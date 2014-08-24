@@ -63,7 +63,10 @@ boot_header = Struct("boot_header",
   Array(3, ULInt32("zero3"))
 )
 
-data = sys.stdin.read()
+input = open(sys.argv[1], "rb")
+data = input.read()
+input.close()
+
 header = boot_header.parse(data)
 print header
 if header.stored_size == len(data):
@@ -71,4 +74,29 @@ if header.stored_size == len(data):
 else:
 	print "stored_size NOK"
 
+stored_imagefs = header.stored_size - header.startup_size
+if stored_imagefs == header.imagefs_size:
+	print "imagefs_size OK, uncompressed"
+elif stored_imagefs < header.imagefs_size:
+	print "imagefs_size OK, compressed %d -> %d" % (header.imagefs_size, stored_imagefs)
+if stored_imagefs > header.imagefs_size:
+	print "imagefs_size NOK: imagefs %d, stored %d" % (header.imagefs_size, stored_imagefs)
+
+startup = open(sys.argv[1] + ".startup", "wb")
+startup.write(data[:header.startup_size])
+print "Wrote " + str(startup)
+startup.close()
+
+imagefs = open(sys.argv[1] + ".imagefs", "wb")
+imagefs_data = data[header.startup_size:]
+imagefs.write(imagefs_data)
+print "Wrote " + str(imagefs)
+imagefs.close()
+
+if header.flags1.Compression == 'STARTUP_HDR_FLAGS1_COMPRESS_LZO': 
+	import lzo
+	print "Attempting LZO decompression"
+	d_imagefs_data = lzo.decompress(imagefs_data)
+	print "Decompressed %d -> %d" % (len(imagefs_data), len(d_imagefs_data))
+	print "imagefs size %s" % ("OK" if len(d_imagefs_data) == header.imagefs_size else "NOK") 
 
