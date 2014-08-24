@@ -1,5 +1,8 @@
 import sys
+import cStringIO
+
 from construct import *
+from subprocess import PIPE, Popen
 
 # http://www.qnx.com/developers/docs/660/index.jsp?topic=%2Fcom.qnx.doc.neutrino.building%2Ftopic%2Fload_process_Boot_header.html
 
@@ -93,14 +96,21 @@ imagefs.write(imagefs_data)
 print "Wrote " + str(imagefs)
 imagefs.close()
 
-imagefs_struct = Range(1, 2000, PascalString("imagefs", length_field = UBInt16("length")))
+imagefs_struct = Range(1, 5000, PascalString("imagefs", length_field = UBInt16("length")))
 imagefs_parsed = imagefs_struct.parse(imagefs_data)
 print "Found %d LZO blocks" % len(imagefs_parsed)
 
+imagefs = open(sys.argv[1] + ".decompressed", "wb")
 for i in range(len(imagefs_parsed)):
+	sys.stdout.write("\rDecompress: %d/%d " % (i, len(imagefs_parsed)))
 	if len(imagefs_parsed[i]) == 0:
 		continue
-	imagefs = open(sys.argv[1] + ".imagefs.lzoblock.%03d" % i, "wb")
-	imagefs.write(imagefs_parsed[i])
-#	print "Wrote " + str(imagefs)
-	imagefs.close()
+	lzod = Popen("./lzod", stdin=PIPE, stdout=imagefs, stderr=PIPE)
+	lzod_result = lzod.communicate(imagefs_parsed[i])
+	if (lzod.returncode != 0):
+		print "Failed: %d" % lzod.returncode
+		print lzod_result
+		raise Exception
+
+print "\nWrote " + str(imagefs)
+imagefs.close()
