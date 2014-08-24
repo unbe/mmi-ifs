@@ -2,29 +2,48 @@
 #include<stdlib.h>
 #include<string.h>
 #include<unistd.h>
-#include<lzo1x.h>
+#include<lzo/lzo1x.h>
+#include<sys/stat.h>
 
 int main(int argc, char* argv[]) {
-  printf("start\n");
-  printf("open: %s\n", argv[1]);
+  struct stat st;
+  stat(argv[1], &st);
+
+  if (argc < 2) {
+    fprintf(stderr, "Usage: lzod <input> <output>");
+    return -1;
+  }
+
   FILE *fp = fopen(argv[1], "rb");
-  if(!fp) {
-    printf("COCK!\n");
+  if (!fp) {
+    perror(argv[1]);
     return -1;
   } 
-  unsigned char *compdata = malloc(1024*1024*100);
-  unsigned long complen = fread(compdata, 1, 1024*1024*100, fp);
-  printf("read: %lu\n", complen);
+
+  unsigned long complen = st.st_size;
+  unsigned char *compdata = malloc(complen);
+  if (complen != fread(compdata, 1, complen, fp)) {
+    perror("Read");
+  }
+  fprintf(stderr, "read: %lu\n", complen);
   fclose(fp);
   
-  unsigned char* dstdata = malloc(1024*1024*100);
-  unsigned long dstlen = 1024*1024*100;
-  unsigned char tmp[1024*100];
+  unsigned long dstlen = complen*10;
+  unsigned char* dstdata = malloc(dstlen);
+  unsigned char tmp[1];
   int r = lzo1x_decompress(compdata, complen, dstdata, &dstlen, tmp);
-  printf("r: %d\n", r);
-  printf("dstlen: %ld\n", dstlen);
+  fprintf(stderr, "result: %d\n", r);
+  fprintf(stderr, "uncompressed length: %ld\n", dstlen);
 
   fp = fopen(argv[2], "w+b");
-  fwrite(dstdata, 1, dstlen, fp);
+  if (!fp) {
+    perror(argv[2]);
+    return -1;
+  } 
+  if (fwrite(dstdata, 1, dstlen, fp) != dstlen) {
+    perror("Write");
+  }
   fclose(fp);
+  
+  return r;
 }

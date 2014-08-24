@@ -93,10 +93,12 @@ imagefs.write(imagefs_data)
 print "Wrote " + str(imagefs)
 imagefs.close()
 
-imagefs_struct = PascalString("imagefs", length_field = UBInt16("length"))
+imagefs_struct = Range(1, 2000, PascalString("imagefs", length_field = UBInt16("length")))
 imagefs_parsed = imagefs_struct.parse(imagefs_data)
+print "Found %d LZO blocks" % len(imagefs_parsed)
 
-imagefs = open(sys.argv[1] + ".imagefs.lzo", "wb")
-imagefs.write(imagefs_parsed)
-print "Wrote " + str(imagefs)
-imagefs.close()
+for i in range(len(imagefs_parsed)):
+	imagefs = open(sys.argv[1] + ".imagefs.lzoblock.%03d" % i, "wb")
+	imagefs.write(imagefs_parsed[i])
+	print "Wrote " + str(imagefs)
+	imagefs.close()
