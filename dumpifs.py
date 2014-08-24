@@ -98,7 +98,9 @@ imagefs_parsed = imagefs_struct.parse(imagefs_data)
 print "Found %d LZO blocks" % len(imagefs_parsed)
 
 for i in range(len(imagefs_parsed)):
+	if len(imagefs_parsed[i]) == 0:
+		continue
 	imagefs = open(sys.argv[1] + ".imagefs.lzoblock.%03d" % i, "wb")
 	imagefs.write(imagefs_parsed[i])
-	print "Wrote " + str(imagefs)
+#	print "Wrote " + str(imagefs)
 	imagefs.close()

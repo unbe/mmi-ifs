@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
   
   unsigned long dstlen = complen*10;
   unsigned char* dstdata = malloc(dstlen);
-  unsigned char tmp[1];
+  unsigned char* tmp = malloc(dstlen);
   int r = lzo1x_decompress(compdata, complen, dstdata, &dstlen, tmp);
   fprintf(stderr, "result: %d\n", r);
   fprintf(stderr, "uncompressed length: %ld\n", dstlen);
