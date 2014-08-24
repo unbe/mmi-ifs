@@ -93,10 +93,10 @@ imagefs.write(imagefs_data)
 print "Wrote " + str(imagefs)
 imagefs.close()
 
-if header.flags1.Compression == 'STARTUP_HDR_FLAGS1_COMPRESS_LZO': 
-	import lzo
-	print "Attempting LZO decompression"
-	d_imagefs_data = lzo.decompress(imagefs_data)
-	print "Decompressed %d -> %d" % (len(imagefs_data), len(d_imagefs_data))
-	print "imagefs size %s" % ("OK" if len(d_imagefs_data) == header.imagefs_size else "NOK") 
+imagefs_struct = PascalString("imagefs", length_field = UBInt16("length"))
+imagefs_parsed = imagefs_struct.parse(imagefs_data)
 
+imagefs = open(sys.argv[1] + ".imagefs.lzo", "wb")
+imagefs.write(imagefs_parsed)
+print "Wrote " + str(imagefs)
+imagefs.close()
