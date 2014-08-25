@@ -82,7 +82,7 @@ if stored_imagefs == header.imagefs_size:
 	print "imagefs_size OK, uncompressed"
 elif stored_imagefs < header.imagefs_size:
 	print "imagefs_size OK, compressed %d -> %d" % (header.imagefs_size, stored_imagefs)
-if stored_imagefs > header.imagefs_size:
+else:
 	print "imagefs_size NOK: imagefs %d, stored %d" % (header.imagefs_size, stored_imagefs)
 
 startup = open(sys.argv[1] + ".startup", "wb")

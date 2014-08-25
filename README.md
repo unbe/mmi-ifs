@@ -2,11 +2,13 @@ mmi-ifs
 =======
 
 **** HACK *** HACK *** HACK *** HACK ****
+
 I hacked this together to unpack QNX flash images, in particular the ifs-root.ifs
 image of Audi MMI systems. 
 
 This code is probably buggy, missing features and simply does not work. Worked for me, though.
 
+```
 $ dumpifs ifs-root.ifs
 dumpifs: Unable to find startup header in ifs-root.ifs
 $ dumpifs ifs-root.ifs.imagefs.decomp
@@ -22,3 +24,4 @@ $ dumpifs ifs-root.ifs.imagefs.decomp
      ----        9  dev/console -> /dev/ser1
      ----        a  tmp -> /dev/shmem
 [...]
+```
