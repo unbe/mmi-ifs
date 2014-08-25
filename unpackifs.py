@@ -1,5 +1,4 @@
 import sys
-import cStringIO
 
 from construct import *
 from subprocess import PIPE, Popen
@@ -96,7 +95,7 @@ imagefs.write(imagefs_data)
 print "Wrote " + str(imagefs)
 imagefs.close()
 
-imagefs_struct = Range(1, 5000, PascalString("imagefs", length_field = UBInt16("length")))
+imagefs_struct = GreedyRange(PascalString("imagefs", length_field = UBInt16("length")))
 imagefs_parsed = imagefs_struct.parse(imagefs_data)
 print "Found %d LZO blocks" % len(imagefs_parsed)
 
