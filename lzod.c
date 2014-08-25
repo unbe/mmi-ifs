@@ -16,8 +16,8 @@ int main() {
     }
     complen += bytes;
     buflen -= bytes;
-    if (buflen < 0) {
-      fprintf(stderr, "Input file too long");
+    if (buflen <= 0) {
+      fprintf(stderr, "Input file too long\n");
       return -1;
     }
   }
