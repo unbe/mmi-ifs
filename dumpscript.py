@@ -13,8 +13,12 @@ script_struct = GreedyRange(Struct("statement",
   If(lambda ctx: ctx.length > 0,
     Switch("args", lambda ctx: ctx.type, 
 	  	{
-	  		"PRINT": String("text", lambda ctx: ctx.length - 4),
-				"RUN": Struct("exec", 
+	  		"PRINT": Struct("print",
+					CString("text"),
+					Anchor("end"),
+					Padding(lambda ctx: ctx._.length - ctx.end + ctx._.start),
+				),
+				"RUN": Struct("run", 
 					Padding(6),
 					ULInt8("argc"),
 					ULInt8("envc"),
@@ -39,7 +43,7 @@ for stmt in script:
 	if stmt.length == 0:
 		continue
 	elif stmt.type == 'PRINT':
-		print 'echo "%s"' % stmt.args
+		print 'echo "%s"' % stmt.args.text
 	elif stmt.type == 'RUN':
 		print ' '.join(stmt.args.arg)
 	else:
